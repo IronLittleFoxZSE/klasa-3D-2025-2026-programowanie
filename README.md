@@ -5,9 +5,11 @@ Kartkówka z pierwszej godziny będzie na zajęciach w dniu 23.09.2025
 Kartkówka
 
 Komputer 1, 3, 5, 7, 9, 11, 13, 15, 17
-https://forms.office.com/e/cGqm7wxQ6E
+
+https://forms.office.com/e/DApdFVuAib
 
 
 Komputer 2, 4, 6, 8, 10, 12, 14, 16
-https://forms.office.com/e/PxGwNTJPJh
+
+https://forms.office.com/e/sGM1E8AGv2
 
