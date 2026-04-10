@@ -1,4 +1,11 @@
 # klasa-3D-2025-2026-programowanie
+lukasz.felisek@ezse.pl
+
+Tytuł:
+
+[Imię Nazwisko klasa] Linq
+
+
 
 Kartkówka z pierwszej godziny będzie na zajęciach w dniu 23.09.2025
 
