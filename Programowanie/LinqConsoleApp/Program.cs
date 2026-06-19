@@ -6,12 +6,13 @@
 
 // Kolekcja przyk³adowych osób
 using LinqConsoleApp;
+using System.Drawing;
 using static System.Net.Mime.MediaTypeNames;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 var people = new List<Person>
     {
-        new Person() { Id=1, FirstName="Anna",  LastName="Nowak",    Age=29, Gender=Gender.Female, City="Kielce", Salary=8200m,  Skills=["C#", "LINQ", "SQL"] },
+        new() { Id=1, FirstName="Anna",  LastName="Nowak",    Age=29, Gender=Gender.Female, City="Kielce", Salary=8200m,  Skills=["C#", "LINQ", "SQL"] },
         new() { Id=2, FirstName="Marek", LastName="Kowalski", Age=43, Gender=Gender.Male,   City="Warszawa", Salary=15000m, Skills=["Azure", "C#", "DevOps"] },
         new() { Id=3, FirstName="Ewa",   LastName="Wiœniewska",Age=35, Gender=Gender.Female, City="Kraków", Salary=9800m,  Skills=["JavaScript", "React"] },
         new() { Id=4, FirstName="Jan",   LastName="Zieliñski", Age=43, Gender=Gender.Male,   City="Gdañsk", Salary=12000m, Skills=["C#", "SQL"] },
@@ -20,6 +21,15 @@ var people = new List<Person>
         new() { Id=7, FirstName="Iga",   LastName="Kowal",     Age=31, Gender=Gender.Female, City="Kraków", Salary=9900m,  Skills=["Go", "Kubernetes"] },
         new() { Id=8, FirstName="Tomek", LastName="Sikora",    Age=29, Gender=Gender.Male,   City="Kielce", Salary=8800m,  Skills=["C#", "MAUI", "Bluetooth"] },
     };
+
+var cities = new[]
+{
+    new { City = "Kielce",    Region = "Œwiêtokrzyskie" },
+    new { City = "Warszawa",  Region = "Mazowieckie" },
+    new { City = "Kraków",    Region = "Ma³opolskie" },
+    new { City = "Wieliczka", Region = "Ma³opolskie" },
+    new { City = "Gdañsk",    Region = "Pomorskie" }
+};
 
 
 //FILTRACJA
@@ -207,6 +217,157 @@ var peopleFromKielceOrderByFirstName = people .Where(p => p.City == "Kielce")
                                               .OrderBy(p => p.FirstName)
                                               .Select(p => p.FirstName);
 Print("Kolekcja imion ", peopleFromKielceOrderByFirstName);
+
+
+// OPERACJE NA ZBIORACH (SET OPERATIONS)
+
+/*
+ select distinct City
+ from people
+*/
+
+var uniqueCities = people
+    .Select(p => p.City)
+    .Distinct();
+
+Print("Unikalne miasta", uniqueCities);
+
+var uniqueSkills = people
+    .SelectMany(p => p.Skills)
+    .Distinct();
+
+Print("Unikalne umiejêtnoœci", uniqueSkills);
+
+
+var kielceSkills = people
+    .Where(p => p.City == "Kielce")
+    .SelectMany(p => p.Skills);
+
+var krakowSkills = people
+    .Where(p => p.City == "Kraków")
+    .SelectMany(p => p.Skills);
+
+/*
+List<string> lista = new List<string>();
+foreach (var item in kielceSkills)
+    lista.Add(item);
+foreach (var item in krakowSkills)
+    lista.Add(item);
+*/
+
+var unionSkills = kielceSkills.Union(krakowSkills);
+
+Print("Umiejêtnoœci Kielce + Kraków (Union)", unionSkills);
+
+
+var femaleSkills = people
+    .Where(p => p.Gender == Gender.Female)
+    .SelectMany(p => p.Skills);
+
+var maleSkills = people
+    .Where(p => p.Gender == Gender.Male)
+    .SelectMany(p => p.Skills);
+
+/*
+List<string> lista = new List<string>();
+foreach (var f in femaleSkills)
+    foreach (var m in maleSkills)
+        if (f==m)
+        {
+            lista.Add(m);
+            break;
+        }
+*/
+
+var commonSkills = femaleSkills.Intersect(maleSkills);
+
+Print("Wspólne umiejêtnoœci kobiet i mê¿czyzn (Intersect)", commonSkills);
+
+var warsawSkills = people
+    .Where(p => p.City == "Warszawa")
+    .SelectMany(p => p.Skills);
+
+/*
+List<string> lista = new List<string>();
+foreach (var w in warsawSkills)
+{
+    bool isIn = false;
+    foreach (var k in kielceSkills)
+        if (k==w)
+        {
+            isIn = true;
+            break;
+        }
+    if (!isIn)
+        lista.Add(w);
+}
+*/
+
+var onlyWarsawSkills = warsawSkills.Except(kielceSkills);
+
+Print("Umiejêtnoœci tylko w Warszawie (Except)", onlyWarsawSkills);
+
+
+// £¥CZENIE KOLEKCJI (JOIN)
+
+/*
+ SELECT p.FirstName, p.LastName, c.Region
+ FROM people p
+ INNER JOIN cities c ON p.City = c.City
+*/
+
+var peopleWithRegion = people.Join(
+    cities,
+    p => p.City,
+    c => c.City,
+    (p, c) =>
+    {
+        //return new { p.FirstName, p.LastName, c.Region};
+        return new { p,c};
+    }
+).Select(x => new {x.p.FirstName, x.p.LastName, x.c.Region});
+
+Console.WriteLine("\n=== Osoby z regionami (JOIN) ===");
+foreach (var item in peopleWithRegion)
+{
+    Console.WriteLine($"{item.FirstName} {item.LastName} | {item.Region}");
+}
+
+
+// DEFERRED vs IMMEDIATE EXECUTION
+
+var deferredQuery = people
+    .Where(p => p.Age > 30)
+    .OrderBy(p => p.FirstName)
+    .Where(p => p.Salary > 300)
+    .ToList();
+
+
+people.Add(new Person
+{
+    Id = 9,
+    FirstName = "Nowy",
+    LastName = "Uczeñ",
+    Age = 45,
+    Gender = Gender.Male,
+    City = "Kielce",
+    Salary = 11000m,
+    Skills = ["C#"]
+});
+
+Console.WriteLine("\n=== Deferred execution – wynik ===");
+foreach (var person in deferredQuery)
+{
+    Console.WriteLine(person);
+}
+
+
+
+
+
+
+
+
 
 
 void Print<T>(string title, IEnumerable<T> data)
